@@ -62,17 +62,20 @@ http
           date.getHours() - currentHour === 2 &&
           Math.abs(date.getMinutes() - currentMinute) >= 30;
 
-        if (date.getDate() - currentDay <= 1) {
+        if (date.getDate() - currentDay === 1) {
           eventEmitter.emit("day", record);
+        }
 
-          if (checkRoundDate || checkHalfDate) {
-            eventEmitter.emit("hour", record);
+        if (
+          date.getDate() - currentDay === 0 &&
+          (checkRoundDate || checkHalfDate)
+        ) {
+          eventEmitter.emit("hour", record);
 
-            clearInterval(intervalId);
+          clearInterval(intervalId);
 
-            res.end();
-            return;
-          }
+          res.end();
+          return;
         }
       }, 5000);
 
