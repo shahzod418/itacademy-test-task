@@ -74,7 +74,7 @@ http
             return;
           }
         }
-      }, 60000);
+      }, 5000);
 
       req.socket.on("close", () => {
         clearInterval(intervalId);
