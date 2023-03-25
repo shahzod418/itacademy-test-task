@@ -46,6 +46,7 @@ http
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
       });
+      res.write("data: Record created\n\n");
 
       const intervalId = setInterval(() => {
         const currentDate = new Date();
