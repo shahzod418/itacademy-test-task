@@ -61,7 +61,7 @@ http
           date.getHours() - currentHour === 2 &&
           Math.abs(date.getMinutes() - currentMinute) >= 30;
 
-        if (date.getDate() - currentDay === 1) {
+        if (date.getDate() - currentDay <= 1) {
           eventEmitter.emit("day", record);
 
           if (checkRoundDate || checkHalfDate) {
