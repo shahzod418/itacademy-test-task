@@ -61,7 +61,7 @@ http
           date.getHours() - currentHour === 2 &&
           Math.abs(date.getMinutes() - currentMinute) >= 30;
 
-        if (date.getDate() - currentDay === 0) {
+        if (date.getDate() - currentDay === 1) {
           eventEmitter.emit("day", record);
 
           if (checkRoundDate || checkHalfDate) {
@@ -73,7 +73,7 @@ http
             return;
           }
         }
-      }, 2000);
+      }, 60000);
 
       req.socket.on("close", () => {
         clearInterval(intervalId);
