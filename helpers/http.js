@@ -9,20 +9,16 @@ const getBody = (req) =>
       });
   });
 
-const handleResponse = (res) => (index, data) => {
-  res.write(
-    `event: doctorAppointment\nid: ${index}\nretry: 5000\ndata: ${JSON.stringify(
-      data
-    )}\n\n`
-  );
+const handleResponse = (res) => (data) => {
+  res.write(`event: doctorAppointment\ndata: ${JSON.stringify(data)}\n\n`);
 };
 
-const checkTimeEvent = (res) => (index) => {
-  res.write(`event: checkTime\nid: ${index}\nretry: 5000\ndata:\n\n`);
+const handleConnection = (res) => {
+  res.write("");
 };
 
 module.exports = {
   getBody,
   handleResponse,
-  checkTimeEvent,
+  handleConnection,
 };

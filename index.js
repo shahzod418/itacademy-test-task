@@ -3,11 +3,14 @@ const EventEmitter = require("events");
 
 const { records, eventStreamHead } = require("./constants");
 
-const { getBody, handleResponse, checkTimeEvent } = require("./helpers/http");
+const { getBody, handleResponse, handleConnection } = require("./helpers/http");
 const { getFormattedDate, getFormattedTime } = require("./helpers/format");
 const { isUniqueRecord, removeRecord } = require("./helpers/record");
 
 const PORT = 3000;
+
+const connectionEmitter = new EventEmitter();
+connectionEmitter.on("handleConnection", handleConnection);
 
 http
   .createServer(async (req, res) => {
@@ -46,27 +49,24 @@ http
 
       records.push(JSON.stringify(record));
 
-      const eventEmitter = new EventEmitter();
+      const reminderEmitter = new EventEmitter();
 
-      eventEmitter.once("dayReminder", handleResponse(res));
-      eventEmitter.once("hourReminder", handleResponse(res));
-      eventEmitter.on("checkTime", checkTimeEvent(res));
+      reminderEmitter.once("day", handleResponse(res));
+      reminderEmitter.once("hour", handleResponse(res));
 
       res.writeHead(200, eventStreamHead);
       res.write("data: Record created\n\n");
-
-      let index = 1;
 
       const intervalId = setInterval(() => {
         const currentDate = new Date();
         const currentDay = currentDate.getDate();
 
         if (date.getDate() - currentDay <= 1) {
-          eventEmitter.emit("dayReminder", index, record);
+          reminderEmitter.emit("day", record);
         }
 
         if (date - currentDate <= 5_400_000) {
-          eventEmitter.emit("hourReminder", index, record);
+          reminderEmitter.emit("hour", record);
 
           clearInterval(intervalId);
 
@@ -74,9 +74,7 @@ http
           return;
         }
 
-        eventEmitter.emit("checkTime", index);
-
-        index += 1;
+        connectionEmitter.emit("handleConnection", res);
       }, 5000);
 
       req.socket.on("close", () => {
