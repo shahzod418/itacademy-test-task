@@ -1,7 +1,7 @@
 const http = require("http");
 const EventEmitter = require("events");
 
-const records = require("./constants");
+const { records, eventStreamHead } = require("./constants");
 
 const { getBody, handleResponse } = require("./helpers/http");
 const { getFormattedDate, getFormattedTime } = require("./helpers/format");
@@ -26,9 +26,19 @@ http
         address,
       };
 
+      if (date < Date.now()) {
+        res.writeHead(400);
+        res.write("Can't assign an appointment in the past");
+        res.end();
+
+        return;
+      }
+
       if (!isUniqueRecord(record)) {
         res.writeHead(400);
-        res.write(`There is already an appointment for ${doctor} at ${date}`);
+        res.write(
+          `Appointment for ${doctor} at ${record.date} ${record.time} already exists`
+        );
         res.end();
 
         return;
@@ -38,39 +48,22 @@ http
 
       const eventEmitter = new EventEmitter();
 
-      eventEmitter.once("day", handleResponse(res));
-      eventEmitter.once("hour", handleResponse(res));
+      eventEmitter.once("dayReminder", handleResponse(res));
+      eventEmitter.once("hourReminder", handleResponse(res));
 
-      res.writeHead(200, {
-        Connection: "keep-alive",
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-      });
+      res.writeHead(200, eventStreamHead);
       res.write("data: Record created\n\n");
 
       const intervalId = setInterval(() => {
         const currentDate = new Date();
         const currentDay = currentDate.getDate();
-        const currentHour = currentDate.getHours();
-        const currentMinute = currentDate.getMinutes();
 
-        const checkRoundDate =
-          date.getHours() - currentHour === 1 &&
-          Math.abs(date.getMinutes() - currentMinute) <= 30;
-
-        const checkHalfDate =
-          date.getHours() - currentHour === 2 &&
-          Math.abs(date.getMinutes() - currentMinute) >= 30;
-
-        if (date.getDate() - currentDay === 1) {
-          eventEmitter.emit("day", record);
+        if (date.getDate() - currentDay <= 1) {
+          eventEmitter.emit("dayReminder", record);
         }
 
-        if (
-          date.getDate() - currentDay === 0 &&
-          (checkRoundDate || checkHalfDate)
-        ) {
-          eventEmitter.emit("hour", record);
+        if (date - currentDate <= 5_400_000) {
+          eventEmitter.emit("hourReminder", record);
 
           clearInterval(intervalId);
 

@@ -1,4 +1,4 @@
-const records = require("../constants");
+const { records } = require("../constants");
 
 const isUniqueRecord = (data) => {
   const draftData = JSON.stringify(data);
