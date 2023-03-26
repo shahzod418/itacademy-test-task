@@ -17,7 +17,12 @@ const handleResponse = (res) => (index, data) => {
   );
 };
 
+const checkTimeEvent = (res) => (index) => {
+  res.write(`event: checkTime\nid: ${index}\nretry: 5000\ndata:\n\n`);
+};
+
 module.exports = {
   getBody,
   handleResponse,
+  checkTimeEvent,
 };

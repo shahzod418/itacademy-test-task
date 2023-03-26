@@ -3,7 +3,7 @@ const EventEmitter = require("events");
 
 const { records, eventStreamHead } = require("./constants");
 
-const { getBody, handleResponse } = require("./helpers/http");
+const { getBody, handleResponse, checkTimeEvent } = require("./helpers/http");
 const { getFormattedDate, getFormattedTime } = require("./helpers/format");
 const { isUniqueRecord, removeRecord } = require("./helpers/record");
 
@@ -50,6 +50,7 @@ http
 
       eventEmitter.once("dayReminder", handleResponse(res));
       eventEmitter.once("hourReminder", handleResponse(res));
+      eventEmitter.on("checkTime", checkTimeEvent(res));
 
       res.writeHead(200, eventStreamHead);
       res.write("data: Record created\n\n");
@@ -72,6 +73,8 @@ http
           res.end();
           return;
         }
+
+        eventEmitter.emit("checkTime", index);
 
         index += 1;
       }, 5000);
