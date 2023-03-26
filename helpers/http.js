@@ -9,8 +9,12 @@ const getBody = (req) =>
       });
   });
 
-const handleResponse = (res) => (data) => {
-  res.write(`event: doctorAppointment\ndata: ${JSON.stringify(data)}\n\n`);
+const handleResponse = (res) => (index, data) => {
+  res.write(
+    `event: doctorAppointment\nid: ${index}\nretry: 5000\ndata: ${JSON.stringify(
+      data
+    )}\n\n`
+  );
 };
 
 module.exports = {

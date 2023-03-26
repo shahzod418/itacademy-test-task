@@ -54,22 +54,26 @@ http
       res.writeHead(200, eventStreamHead);
       res.write("data: Record created\n\n");
 
+      let index = 1;
+
       const intervalId = setInterval(() => {
         const currentDate = new Date();
         const currentDay = currentDate.getDate();
 
         if (date.getDate() - currentDay <= 1) {
-          eventEmitter.emit("dayReminder", record);
+          eventEmitter.emit("dayReminder", index, record);
         }
 
         if (date - currentDate <= 5_400_000) {
-          eventEmitter.emit("hourReminder", record);
+          eventEmitter.emit("hourReminder", index, record);
 
           clearInterval(intervalId);
 
           res.end();
           return;
         }
+
+        index += 1;
       }, 5000);
 
       req.socket.on("close", () => {
