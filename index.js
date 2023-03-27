@@ -6,6 +6,7 @@ const { records, eventStreamHead } = require("./constants");
 const { getBody, handleResponse, handleConnection } = require("./helpers/http");
 const { getFormattedDate, getFormattedTime } = require("./helpers/format");
 const { isUniqueRecord, removeRecord } = require("./helpers/record");
+const { validateBody } = require("./helpers/validation");
 
 const PORT = 3000;
 
@@ -18,6 +19,15 @@ http
 
     if (req.url === "/api/doctor-appointment" && req.method === "POST") {
       const body = await getBody(req);
+      const errors = validateBody(body);
+
+      if (errors) {
+        res.writeHead(400);
+        res.write(errors);
+        res.end();
+
+        return;
+      }
 
       const { doctor, address } = body;
       const date = new Date(body.date);
